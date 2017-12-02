@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Crossfilter</title>
+<!-- Code taken from http://square.github.io/crossfilter/ -->
+
+<!-- Start of Code Written  -->
+<style>
+
+@import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700);
+
+body {
+  font-family: "Helvetica Neue";
+  margin: 40px auto;
+  width: 960px;
+  min-height: 2000px;
+}
+
+#body {
+  position: relative;
+}
+
+footer {
+  padding: 2em 0 1em 0;
+  font-size: 12px;
+}
+
+h1 {
+  font-size: 96px;
+  margin-top: .3em;
+  margin-bottom: 0;
+}
+
+h1 + h2 {
+  margin-top: 0;
+}
+
+h2 {
+  font-weight: 400;
+  font-size: 28px;
+}
+
+h1, h2 {
+  font-family: "Yanone Kaffeesatz";
+  text-rendering: optimizeLegibility;
+}
+
+#body > p {
+  line-height: 1.5em;
+  width: 640px;
+  text-rendering: optimizeLegibility;
+}
+
+#charts {
+  padding: 10px 0;
+}
+
+.chart {
+  display: inline-block;
+  height: 160px;
+  margin-bottom: 20px;
+}
+
+.reset {
+  padding-left: 1em;
+  font-size: smaller;
+  color: #ccc;
+}
+
+.background.bar {
+  fill: #ccc;
+}
+
+.foreground.bar {
+  fill: steelblue;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.brush rect.extent {
+  fill: steelblue;
+  fill-opacity: .125;
+}
+
+.brush .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
+#hour-chart {
+  width: 300px;
+}
+
+#delay-chart {
+  width: 350px;
+}
+
+#distance-chart {
+  width: 350px;
+}
+#mins-played-chart{
+  width: 350px;
+}
+
+#date-chart {
+  width: 300px;
+}
+
+#flight-list {
+  min-height: 1024px;
+}
+
+#flight-list .date,
+#flight-list .day {
+  margin-bottom: .4em;
+}
+
+#flight-list .flight {
+  line-height: 1.5em;
+  background: #eee;
+  width: 1000px;
+  margin-bottom: 1px;
+}
+
+#flight-list .time {
+  color: #999;
+}
+
+#flight-list .flight div {
+  display: inline-block;
+  width: 100px;
+}
+
+#flight-list div.long {
+  width: 150px;
+  padding-right: 10px;
+  text-align: left;
+}
+
+#flight-list div.short {
+  width: 50px;
+  padding-right: 10px;
+  text-align: center;
+}
+
+#flight-list div.medium {
+  width: 100px;
+  padding-right: 10px;
+  text-align: left;
+}
+
+#flight-list .early {
+  color: green;
+}
+
+aside {
+  position: absolute;
+  left: 740px;
+  font-size: smaller;
+  width: 220px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+  #container {
+    display: table;
+    }
+
+  #row  {
+    display: table-row;
+    }
+
+  #left, #right, #middle {
+    display: table-cell;
+	width: 170px;
+	font-weight: 400;
+    }
+	
+	path.slice{
+		stroke-width:2px;
+	}
+
+	polyline{
+		opacity: .3;
+		stroke: black;
+		stroke-width: 2px;
+		fill: none;
+	}
+	
+</style>
+<!-- End of Code Written  -->
+<div id="body">
+
+<h1>Crossfilter</h1>
+
+<h2>Fast Multidimensional Filtering for Coordinated Views</h2>
+
+<h2>Example: English Premier League Defensive Stats</h2>
+
+
+<div id="charts">
+  <div id="hour-chart" class="chart">
+    <div class="title">Tackles Per Game</div>
+  </div>
+  <div id="date-chart" class="chart">
+    <div class="title">Interceptions Per Game</div>
+  </div>
+  <div id="distance-chart" class="chart">
+    <div class="title">Fouls Per Game</div>
+  </div>
+  
+  
+ <div id="delay-chart" class="chart">
+    <div class="title">Clearances Per Game</div>
+	
+	</div> 
+   <div id="mins-played-chart" class="chart">
+    <div class="title">Mins Played</div>
+  </div>
+	<aside id="totals"><span id="active">-</span> of <span id="total">-</span> players selected.</aside>
+  
+</div>
+
+<div id="container">
+  <div id="row" class="flight-list div.long">
+
+   	<div id="left">
+  		<h4>Rank</h4>
+  	</div>
+  	<div id="middle">
+  		<h4>Name</h4>
+  	</div>
+
+  	<div id="middle">
+  		<h4>Position</h4>
+  	</div>
+
+  	<div id="middle">
+  		<h4>Team</h4>
+  	</div>
+	
+  	<div id="middle">
+  		<h4>Age</h4>
+  	</div>
+	<div id="middle">
+  		<h4>Region</h4>
+  	</div>
+	
+  	<div id="middle">
+  		<h4>Tackles Per Game</h4>
+  	</div>
+	
+  	<div id="middle">
+  		<h4>Intercepts per Game</h4>
+  	</div>
+	
+  	<div id="middle">
+  		<h4>Fouls Per Game</h4>
+  	</div>
+		<div id="middle">
+  		<h4>Clearances Per Game</h4>
+  	</div>
+
+  	<div id="right">
+    	<h4>Minutes Played</h4>
+  	</div>
+
+	</div>
+</div>
+
+</div>
+
+<div id="lists">
+
+
+
+  <div id="flight-list" class="list">
+  
+  </div>
+</div>
+
+<label><input type="checkbox"> Sort values</label>
+
+<footer>
+  <span style="float:right;">
+    Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
+  </span>
+  Copyright 2012 <a href="http://squareup.com">Square, Inc.</a>
+</footer>
+
+
+</div>
+
+<script src="crossfilter.v1.min.js"></script>
+<script src="d3.v3.min.js"></script>
+<!--<script src="worldd3.js"></script> -->
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+
+<script>
+
+			var w = 1000;
+			var h = 500;
+			var mapDataArray = [];
+			var countryDisplay = [];
+			var countryCoordinates = [];
+			var projection = d3.geo.equirectangular()
+				.translate([525, 300])
+				.scale(175);
+			var path = d3.geo.path()
+				.projection(projection);		
+			var grat = d3.geo.graticule();	
+			var svg = d3.select("body").insert("svg")
+				.attr("width", w)
+				.attr("height", h);	
+
+			var countries = svg.append("g")
+				.attr("id", "countries")
+				.attr("width", w)
+				.attr("height", h);
+				
+
+var countryCode = [];
+				
+
+var countrymargin = {top: 20, right: 20, bottom: 30, left: 40}, /*This is a modified line*/
+    countrywidth = 1200 - countrymargin.left - countrymargin.right, /*This is a modified line*/
+    countryheight = 800 - countrymargin.top - countrymargin.bottom; /*This is a modified line*/
+	
+var temporaryarray = [];
+var teams = [];
+var counterArray = [];
+var teamCount = [];
+
+/*var formatPercent = d3.format(".0%");*/ /*This is a modified line*/
+
+var countryx = d3.scale.ordinal() /*This is a modified line*/
+    .rangeRoundBands([0, countrywidth], .1, 1); /*This is a modified line*/
+
+var countryy = d3.scale.linear() /*This is a modified line*/
+    .range([countryheight, 0]); /*This is a modified line*/
+
+var countryxAxis = d3.svg.axis() /*This is a modified line*/
+    .scale(countryx) /*This is a modified line*/
+    .orient("bottom"); /*This is a modified line*/
+
+var countryyAxis = d3.svg.axis() /*This is a modified line*/
+    .scale(countryy) /*This is a modified line*/
+    .orient("left") /*This is a modified line*/
+    /*.tickFormat(formatPercent);*/ /*This is a modified line*/
+
+var countrysvg = d3.select("body").append("svg") /*This is a modified line*/
+    .attr("width", countrywidth + countrymargin.left + countrymargin.right) /*This is a modified line*/
+    .attr("height", countryheight + countrymargin.top + countrymargin.bottom) /*This is a modified line*/
+  .append("g") /*This is a modified line*/
+    .attr("transform", "translate(" + countrymargin.left + "," + countrymargin.top + ")"); /*This is a modified line*/
+
+var countrytip = d3.tip() /*This is a modified line*/
+  .attr('class', 'd3-tip') /*This is a modified line*/
+  .offset([-10, 0]) /*This is a modified line*/
+  .html(function(d) { /*This is a modified line*/
+    return "<strong>Country:</strong> <span style='color:red'>" + d.countryname + "</span>"; /*This is a modified line*/
+  }) /*This is a modified line*/
+  
+  countrysvg.call(countrytip); /*This is a modified line*/
+  
+  var line = d3.svg.line() /*This is a modified line*/
+    .x(function(d) { return x(d.goals); }) /*This is a modified line*/
+    .y(function(d) { return y(d.assistTotal); }); /*This is a modified line*/
+	
+d3.csv("country.csv", function(error, data) { /*This is a modified line*/
+
+  data.forEach(function(d) {
+    d.frequency = +d.frequency;
+  });
+
+  countryx.domain(data.map(function(d) { return d.countrycode; })); /*This is a modified line*/
+  countryy.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+  countrysvg.append("g") /*This is a modified line*/
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + countryheight + ")") /*This is a modified line*/
+      .call(countryxAxis); /*This is a modified line*/
+
+  countrysvg.append("g") /*This is a modified line*/
+      .attr("class", "y axis")
+      .call(countryyAxis) /*This is a modified line*/
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Frequency");
+
+  countrysvg.selectAll(".bar") /*This is a modified line*/
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return countryx(d.countrycode); }) /*This is a modified line*/
+      .attr("width", countryx.rangeBand()) /*This is a modified line*/
+      .attr("y", function(d) { return countryy(d.frequency); }) /*This is a modified line*/
+      .attr("height", function(d) { return countryheight - countryy(d.frequency);}) /*This is a modified line*/
+      .on('mouseover', countrytip.show) /*This is a modified line*/
+      .on('mouseout', countrytip.hide); /*This is a modified line*/
+
+  d3.select("input").on("change", change);
+
+  var sortTimeout = setTimeout(function() {
+    d3.select("input").property("checked", true).each(change);
+  }, 2000);
+
+  function change() {
+    clearTimeout(sortTimeout);
+
+    // Copy-on-write since tweens are evaluated after a delay.
+    var x0 = countryx.domain(data.sort(this.checked
+        ? function(a, b) { return b.frequency - a.frequency; }
+        : function(a, b) { return d3.ascending(a.countrycode, b.countrycode); }) /*This is a modified line*/
+        .map(function(d) { return d.countrycode; })) /*This is a modified line*/
+        .copy();
+
+    var transition = countrysvg.transition().duration(750),
+        delay = function(d, i) { return i * 50; };
+
+    transition.selectAll(".bar")
+        .delay(delay)
+        .attr("x", function(d) { return x0(d.countrycode); }); /*This is a modified line*/
+
+    transition.select(".x.axis")
+        .call(countryxAxis) /*This is a modified line*/
+      .selectAll("g")
+        .delay(delay);
+  }
+});
+
+
+// (It's CSV, but GitHub Pages only gzip's JSON at the moment.)
+d3.csv("defensive_stats2.csv", function(error, flights) { /*This is a modified line*/
+
+  // Various formatters.
+  var formatNumber = d3.format(",d"),
+      formatChange = d3.format("+,d"),
+      formatDate = d3.time.format("%B %d, %Y"),
+      formatTime = d3.time.format("%I:%M %p");
+
+  // A nest operator, for grouping the flight list.
+  var nestByDate = d3.nest()
+      .key(function(d) { return d3.time.day(d.date); });
+
+  // A little coercion, since the CSV is untyped.
+  flights.forEach(function(d, i) {
+    d.index = i;
+    d.date = parseDate(d.date); /*This is a modified line*/
+    d.age = +d.age; /*This is a modified line*/
+    d.height = +d.height; /*This is a modified line*/
+	d.weight = +d.weight; /*This is a modified line*/
+	d.tacklePerGame = +d.tacklePerGame; /*This is a modified line*/
+	d.interceptionPerGame = +d.interceptionPerGame; /*This is a modified line*/
+	d.foulsPerGame = +d.foulsPerGame; /*This is a modified line*/
+	d.clearancePerGame = +d.clearancePerGame; /*This is a modified line*/
+	d.wasDribbledPerGame = +d.wasDribbledPerGame; /*This is a modified line*/
+	d.minsPlayed = +d.minsPlayed;
+
+  });
+
+  // Create the crossfilter for the relevant dimensions and groups.
+  var flight = crossfilter(flights),
+      all = flight.groupAll(),
+	  tacklePerGame = flight.dimension(function(d) { return d.tacklePerGame; }), /*This is a modified line*/
+	  interceptionPerGame = flight.dimension(function(d) { return d.interceptionPerGame; }), /*This is a modified line*/
+	  foulsPerGame = flight.dimension(function(d) { return d.foulsPerGame; }), /*This is a modified line*/
+	  clearancePerGame = flight.dimension(function(d) { return d.clearancePerGame; }), /*This is a modified line*/
+	  wasDribbledPerGame = flight.dimension(function(d) { return d.wasDribbledPerGame; }), /*This is a modified line*/
+	  minsPlayed = flight.dimension(function(d) { return d.minsPlayed; }), /*This is a modified line*/
+	  
+	  tackles = tacklePerGame.group(Math.max), /*This is a modified line*/
+	  intercepts = interceptionPerGame.group(Math.max), /*This is a modified line*/
+	  fouls = foulsPerGame.group(Math.max), /*This is a modified line*/
+	  clearances = clearancePerGame.group(Math.max), /*This is a modified line*/
+	  played = minsPlayed.group(Math.max),
+      date = flight.dimension(function(d) { return d.date; }),
+      dates = date.group(d3.time.day);
+      /*hour = flight.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; }),
+      hours = hour.group(Math.floor),
+      delay = flight.dimension(function(d) { return Math.max(-60, Math.min(149, d.delay)); }),
+      delays = delay.group(function(d) { return Math.floor(d / 10) * 10; }),
+      distance = flight.dimension(function(d) { return Math.min(1999, d.distance); }),
+      distances = distance.group(function(d) { return Math.floor(d / 50) * 50; });
+*/
+  var charts = [
+
+    barChart()
+        .dimension(tacklePerGame) /*This is a modified line*/
+        .group(tackles) /*This is a modified line*/
+      .x(d3.scale.linear()
+        .domain([0, 5]) /*This is a modified line*/
+        .range([0, 10 * 25])), /*This is a modified line*/
+		
+	barChart()
+        .dimension(interceptionPerGame) /*This is a modified line*/
+        .group(intercepts) /*This is a modified line*/
+      .x(d3.scale.linear()
+        .domain([0, 4]) /*This is a modified line*/
+        .range([0, 10 * 25])), /*This is a modified line*/
+
+    barChart()
+        .dimension(foulsPerGame) /*This is a modified line*/
+        .group(fouls) /*This is a modified line*/
+      .x(d3.scale.linear()
+        .domain([0, 5.5]) /*This is a modified line*/
+        .range([0, 7 * 25])), /*This is a modified line*/
+
+    barChart()
+        .dimension(clearancePerGame) /*This is a modified line*/
+        .group(clearances) /*This is a modified line*/
+      .x(d3.scale.linear()
+        .domain([0, 3]) /*This is a modified line*/
+        .range([0, 10 * 20])), /*This is a modified line*/
+		
+		barChart()
+        .dimension(minsPlayed) /*This is a modified line*/
+        .group(played) /*This is a modified line*/
+      .x(d3.scale.linear()
+        .domain([0, 3500]) /*This is a modified line*/
+        .range([0, 10 * 30])), /*This is a modified line*/
+
+  ];
+  
+
+  // Given our array of charts, which we assume are in the same order as the
+  // .chart elements in the DOM, bind the charts to the DOM and render them.
+  // We also listen to the chart's brush events to update the display.
+  var chart = d3.selectAll(".chart")
+      .data(charts)
+      .each(function(chart) { chart.on("brush", renderAll).on("brushend", renderAll); });
+
+  // Render the initial lists.
+  var list = d3.selectAll(".list")
+      .data([flightList]);
+
+  // Render the total.
+  d3.selectAll("#total")
+      .text(formatNumber(flight.size()));
+
+  renderAll();
+
+  // Renders the specified chart or list.
+  function render(method) {
+    d3.select(this).call(method);
+  }
+
+  // Whenever the brush moves, re-rendering everything.
+  function renderAll() {
+    chart.each(render);
+    list.each(render);
+    d3.select("#active").text(formatNumber(all.value()));
+  }
+
+  // Like d3.time.format, but faster.
+  function parseDate(d) {
+    return new Date(2001,
+        d.substring(0, 2) - 1,
+        d.substring(2, 4),
+        d.substring(4, 6),
+        d.substring(6, 8));
+  }
+
+  window.filter = function(filters) {
+    filters.forEach(function(d, i) { charts[i].filter(d); });
+    renderAll();
+  };
+
+  window.reset = function(i) {
+    charts[i].filter(null);
+    renderAll();
+  };
+
+  function flightList(div) {
+    var flightsByDate = nestByDate.entries(date.top(40));
+
+    div.each(function() {
+      var date = d3.select(this).selectAll(".date")
+          .data(flightsByDate, function(d) { return d.key; });
+
+      date.enter().append("div")
+          .attr("class", "date");	  
+
+      date.exit().remove();
+
+      var flight = date.order().selectAll(".flight")
+          .data(function(d) { return d.values; }, function(d) { return d.index; });
+
+      var flightEnter = flight.enter().append("div")
+          .attr("class", "flight");
+
+		flightEnter.append("div")
+          .attr("class", "short") /*This is a modified line*/
+          .text(function(d) { return d.ranking; }); /*This is a modified line*/
+      flightEnter.append("div")
+          .attr("class", "short") /*This is a modified line*/
+          .text(function(d) { return d.name; }); /*This is a modified line*/
+
+      flightEnter.append("div")
+          .attr("class", "medium") /*This is a modified line*/
+          .text(function(d) { return d.positionText; }); /*This is a modified line*/
+
+      flightEnter.append("div")
+          .attr("class", "medium") /*This is a modified line*/
+          .text(function(d) { return d.teamName; }); /*This is a modified line*/
+
+      flightEnter.append("div")
+          .attr("class", "medium") /*This is a modified line*/
+          .text(function(d) { return d.age; }); /*This is a modified line*/
+		  
+      flightEnter.append("div") /*This is a modified line*/
+          .attr("class", "short") /*This is a modified line*/
+          .text(function(d) { return d.regionCode; }); /*This is a modified line*/
+		  
+	  flightEnter.append("div") /*This is a modified line*/
+          .attr("class", "short") /*This is a modified line*/
+          .text(function(d) { return d.tacklePerGame.toPrecision(2); }); /*This is a modified line*/
+		  
+	  flightEnter.append("div") /*This is a modified line*/
+          .attr("class", "medium") /*This is a modified line*/
+          .text(function(d) { return d.interceptionPerGame.toPrecision(2); }); /*This is a modified line*/
+		  
+	
+		  
+	  flightEnter.append("div") /*This is a modified line*/
+          .attr("class", "short") /*This is a modified line*/
+          .text(function(d) { return d.foulsPerGame.toPrecision(2); }); /*This is a modified line*/
+		  
+	  flightEnter.append("div") /*This is a modified line*/
+          .attr("class", "medium") /*This is a modified line*/
+          .text(function(d) { return d.clearancePerGame.toPrecision(2); }); /*This is a modified line*/
+		  
+	flightEnter.append("div") /*This is a modified line*/
+          .attr("class", "short") /*This is a modified line*/
+          .text(function(d) { return d.minsPlayed; }); /*This is a modified line*/  
+		  
+	 countryCode = flight[0];
+	 console.log(countryCode);
+		 for(var i=0; i<countryCode.length; i++)
+		 {
+			countryCode[i] = countryCode[i].childNodes[5].textContent.toUpperCase();
+		 }
+		
+		countries.selectAll("path")
+			.attr("fill",  function(d) {return getColor(d.id)});
+			
+		function getColor(id)
+			{
+				var tempColor = "Tan";
+				var tempId = "#" + id;
+				if(countryCode.indexOf(id) != -1)
+				{tempColor = "lightGreen";}
+				return tempColor
+			}
+		
+		 
+		
+	
+		 
+		  
+      flight.exit().remove();
+	  
+	  /*var goaltip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Goals:</strong> <span style='color:red'>" + d.goal + "</span>";
+  })
+  
+  flightEnter.call(goaltip);
+
+      flight.order();*/
+    });
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*	function teamCounter() {
+		teams = ["Arsenal", "Aston Villa", "Burnley", "Chelsea", "Crystal Palace", "Everton", "Hull", 
+		 "Leicester", "Liverpool", "Manchester City", "Manchester United", "Newcastle United", "Queens Park Rangers", 
+		 "Southampton", "Stoke", "Sunderland", "Swansea", "Tottenham", "West Bromwich Albion", "West Ham"];
+		
+		counterArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+		 
+		 for(var i = 0; i < teams.length; i++) {
+			
+			for(var f = 0; f < temporaryarray.length; f++) {
+				if(teams[i] == temporaryarray[f]) {
+					counterArray[i] += 1;
+				}
+			}
+		 }
+		 
+		 
+		 return counterArray;
+		 
+	}	
+	
+	document.getElementById("demo").innerHTML = teamCounter(); */
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  }
+
+  function barChart() {
+    if (!barChart.id) barChart.id = 0;
+
+    var margin = {top: 10, right: 10, bottom: 20, left: 10},
+        x,
+        y = d3.scale.linear().range([100, 0]),
+        id = barChart.id++,
+        axis = d3.svg.axis().orient("bottom"),
+        brush = d3.svg.brush(),
+        brushDirty,
+        dimension,
+        group,
+        round;
+
+    function chart(div) {
+      var width = x.range()[1],
+          height = y.range()[0];
+
+      y.domain([0, group.top(1)[0].value]);
+
+      div.each(function() {
+        var div = d3.select(this),
+            g = div.select("g");
+
+        // Create the skeletal chart.
+        if (g.empty()) {
+          div.select(".title").append("a")
+              .attr("href", "javascript:reset(" + id + ")")
+              .attr("class", "reset")
+              .text("reset")
+              .style("display", "none");
+
+          g = div.append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          g.append("clipPath")
+              .attr("id", "clip-" + id)
+            .append("rect")
+              .attr("width", width)
+              .attr("height", height);
+
+          g.selectAll(".bar")
+              .data(["background", "foreground"])
+            .enter().append("path")
+              .attr("class", function(d) { return d + " bar"; })
+              .datum(group.all());
+
+          g.selectAll(".foreground.bar")
+              .attr("clip-path", "url(#clip-" + id + ")");
+
+          g.append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(axis);
+
+	    g.append("path") /*This is a modified line*/
+      .datum(flight) /*This is a modified line*/
+      .attr("class", "line") /*This is a modified line*/
+      .attr("d", line); /*This is a modified line*/
+	  
+          // Initialize the brush component with pretty resize handles.
+          var gBrush = g.append("g").attr("class", "brush").call(brush);
+          gBrush.selectAll("rect").attr("height", height);
+          gBrush.selectAll(".resize").append("path").attr("d", resizePath);
+        }
+
+        // Only redraw the brush if set externally.
+        if (brushDirty) {
+          brushDirty = false;
+          g.selectAll(".brush").call(brush);
+          div.select(".title a").style("display", brush.empty() ? "none" : null);
+          if (brush.empty()) {
+            g.selectAll("#clip-" + id + " rect")
+                .attr("x", 0)
+                .attr("width", width);
+          } else {
+            var extent = brush.extent();
+            g.selectAll("#clip-" + id + " rect")
+                .attr("x", x(extent[0]))
+                .attr("width", x(extent[1]) - x(extent[0]));
+          }
+        }
+
+        g.selectAll(".bar").attr("d", barPath);
+      });
+
+      function barPath(groups) {
+        var path = [],
+            i = -1,
+            n = groups.length,
+            d;
+        while (++i < n) {
+          d = groups[i];
+          path.push("M", x(d.key), ",", height, "V", y(d.value), "h9V", height);
+        }
+        return path.join("");
+      }
+	  
+
+      function resizePath(d) {
+        var e = +(d == "e"),
+            x = e ? 1 : -1,
+            y = height / 3;
+        return "M" + (.5 * x) + "," + y
+            + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6)
+            + "V" + (2 * y - 6)
+            + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y)
+            + "Z"
+            + "M" + (2.5 * x) + "," + (y + 8)
+            + "V" + (2 * y - 8)
+            + "M" + (4.5 * x) + "," + (y + 8)
+            + "V" + (2 * y - 8);
+      }
+    }
+
+    brush.on("brushstart.chart", function() {
+      var div = d3.select(this.parentNode.parentNode.parentNode);
+      div.select(".title a").style("display", null);
+    });
+
+    brush.on("brush.chart", function() {
+      var g = d3.select(this.parentNode),
+          extent = brush.extent();
+      if (round) g.select(".brush")
+          .call(brush.extent(extent = extent.map(round)))
+        .selectAll(".resize")
+          .style("display", null);
+      g.select("#clip-" + id + " rect")
+          .attr("x", x(extent[0]))
+          .attr("width", x(extent[1]) - x(extent[0]));
+      dimension.filterRange(extent);
+    });
+
+    brush.on("brushend.chart", function() {
+      if (brush.empty()) {
+        var div = d3.select(this.parentNode.parentNode.parentNode);
+        div.select(".title a").style("display", "none");
+        div.select("#clip-" + id + " rect").attr("x", null).attr("width", "100%");
+        dimension.filterAll();
+      }
+    });
+
+    chart.margin = function(_) {
+      if (!arguments.length) return margin;
+      margin = _;
+      return chart;
+    };
+
+    chart.x = function(_) {
+      if (!arguments.length) return x;
+      x = _;
+      axis.scale(x);
+      brush.x(x);
+      return chart;
+    };
+
+    chart.y = function(_) {
+      if (!arguments.length) return y;
+      y = _;
+      return chart;
+    };
+
+    chart.dimension = function(_) {
+      if (!arguments.length) return dimension;
+      dimension = _;
+      return chart;
+    };
+
+    chart.filter = function(_) {
+      if (_) {
+        brush.extent(_);
+        dimension.filterRange(_);
+      } else {
+        brush.clear();
+        dimension.filterAll();
+      }
+      brushDirty = true;
+      return chart;
+    };
+
+    chart.group = function(_) {
+      if (!arguments.length) return group;
+      group = _;
+      return chart;
+    };
+
+    chart.round = function(_) {
+      if (!arguments.length) return round;
+      round = _;
+      return chart;
+    };
+
+    return d3.rebind(chart, brush, "on");
+  }
+});
+<!-- Start of Code Written -->
+<!-- World Map using d3-->
+<!-- Data set Geo Json Format from https://github.com/mbostock/d3/blob/master/test/data/world-countries.json -->
+<!-- Used D3 Lirary in writing the below Code-->
+
+	d3.json("world-countries.json", function(json) {	
+				mapDataArray = json.features;
+				for(var i=0; i<mapDataArray.length; i++)
+				{
+					var j = countryDisplay.indexOf(mapDataArray[i].properties.name);
+					if(j != -1)
+					{
+						countryCoordinates[j] = mapDataArray[i].geometry.coordinates;
+					}
+				}
+
+				countries.selectAll("path")
+					.data(mapDataArray)
+					.enter()
+					.append("path")
+					.attr("d", path)
+					.attr("id", function(d) {return d.properties.name;})
+					.attr("stroke-width", 1)
+					.attr("stroke", "black")
+					.attr("fill",  "Tan")
+					.style("opacity", .4);
+			});
+
+	<!-- Start of Code Written -->
+<!-- World Map using d3-->
+<!-- Data set Geo Json Format from https://github.com/mbostock/d3/blob/master/test/data/world-countries.json -->
+<!-- Used D3 Lirary in writing the below Code-->		
+</script>
+
+<!--Beginning of donut chart, but its not working-->
+<script>
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+<!----------------------------------------Beginning of donut chart---------------------------------------->
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var data = totalArray;
+//alert(data);
+
+var width = 960,
+    height = 500,
+    radius = Math.min(width, height) / 2;
+
+var color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+var arc = d3.svg.arc()
+    .outerRadius(radius)
+    .innerRadius(radius - 100);
+
+var outerArc = d3.svg.arc()
+    .innerRadius(radius + 10)
+    .outerRadius(radius + 10);
+
+var pie = d3.layout.pie()
+    .sort(null)
+    .value(function(d) { return d.value; });
+
+var svg = d3.select("body")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+ 
+    svg.append("g")
+      .attr("class", "labels");
+    svg.append("g")
+      .attr("class", "lines");
+
+var g = svg.selectAll(".arc")
+    .data(pie(data))
+    .enter().append("g")
+    .attr("class", "arc");
+
+g.append("path")
+    .attr("d", arc)
+    .style("fill", function(d) {return color(d.data.value); });
+
+g.append("text")
+    .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+    .attr("dy", ".7em")
+    .style("text-anchor", "middle")
+    .text(function(d) { return d.data.team + ":" + d.data.value; });
+	
+	updateDonut();
+
+function updateDonut() {
+	
+	data = [];
+	
+	for(var i = 0; i < totalArray.length; i++) {
+		if(totalArray[i].value > 0) {
+			data.push(totalArray[i]);
+		}
+	}
+	
+	color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+	
+	var g = d3.select("body").selectAll(".arc")
+    .data(pie(data))
+    .attr("class", "arc");
+	
+	g.select("path")
+    .attr("d", arc)
+    .style("fill", function(d) {return color(d.data.value); });
+	
+	g.select("text")
+    .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+    .text(function(d) { return d.data.team + ":" + d.data.value; });
+	
+}
+
+</script>

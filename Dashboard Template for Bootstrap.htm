@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<!-- Dashboard for Viewing Different Screens such aside
+		Offensive Stats	
+		Defensive Stats	
+		Basic Stats -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
+
+    <title>Soccer Analytics</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="Dashboard%20Template%20for%20Bootstrap_files/bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="Dashboard%20Template%20for%20Bootstrap_files/dashboard.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="Dashboard%20Template%20for%20Bootstrap_files/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	 	<script>  
+
+   $('#offensive').click(function (e) {
+		
+		console.log('Tabs');
+         e.preventDefault();
+         $(this).tab('show');
+         $('#offensive').load('/soccer-analysis-of.html');
+   }); </script>
+   
+   <script src="crossfilter.v1.min.js"></script>
+<script src="d3.v3.min.js"></script>
+<script src="worldd3.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+ 
+
+<style>
+
+@import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700);
+
+body {
+  font-family: "Helvetica Neue";
+  margin: 40px auto;
+  width: 960px;
+  min-height: 2000px;
+}
+
+#body {
+  position: relative;
+}
+
+footer {
+  padding: 2em 0 1em 0;
+  font-size: 12px;
+}
+
+h1 {
+  font-size: 96px;
+  margin-top: .3em;
+  margin-bottom: 0;
+}
+
+h1 + h2 {
+  margin-top: 0;
+}
+
+h2 {
+  font-weight: 400;
+  font-size: 28px;
+}
+
+h1, h2 {
+  font-family: "Yanone Kaffeesatz";
+  text-rendering: optimizeLegibility;
+}
+
+#body > p {
+  line-height: 1.5em;
+  width: 640px;
+  text-rendering: optimizeLegibility;
+}
+
+#charts {
+  padding: 10px 0;
+}
+
+.chart {
+  display: inline-block;
+  height: 160px;
+  margin-bottom: 20px;
+}
+
+.reset {
+  padding-left: 1em;
+  font-size: smaller;
+  color: #ccc;
+}
+
+.background.bar {
+  fill: #ccc;
+}
+
+.foreground.bar {
+  fill: steelblue;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.brush rect.extent {
+  fill: steelblue;
+  fill-opacity: .125;
+}
+
+.brush .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
+#hour-chart {
+  width: 250px;
+}
+
+#delay-chart {
+  width: 250px;
+}
+
+#distance-chart {
+  width: 250px;
+}
+#mins-played-chart{
+  width: 350px;
+}
+
+#date-chart {
+  width: 250px;
+}
+
+#flight-list {
+  min-height: 1024px;
+}
+
+#flight-list .date,
+#flight-list .day {
+  margin-bottom: .4em;
+}
+
+#flight-list .flight {
+  line-height: 1.5em;
+  background: #eee;
+  width: 1000px;
+  margin-bottom: 1px;
+}
+
+#flight-list .time {
+  color: #999;
+}
+
+#flight-list .flight div {
+  display: inline-block;
+  width: 100px;
+}
+
+#flight-list div.long {
+  width: 150px;
+  padding-right: 10px;
+  text-align: left;
+}
+
+#flight-list div.short {
+  width: 50px;
+  padding-right: 10px;
+  text-align: center;
+}
+
+#flight-list div.medium {
+  width: 100px;
+  padding-right: 10px;
+  text-align: left;
+}
+
+#flight-list .early {
+  color: green;
+}
+
+aside {
+  position: absolute;
+  left: 740px;
+  font-size: smaller;
+  width: 220px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+  #container {
+    display: table;
+    }
+
+  #row  {
+    display: table-row;
+    }
+
+  #left, #right, #middle {
+    display: table-cell;
+	width: 170px;
+	font-weight: 400;
+    }
+	
+	path.slice{
+		stroke-width:2px;
+	}
+
+	polyline{
+		opacity: .3;
+		stroke: black;
+		stroke-width: 2px;
+		fill: none;
+	}
+	
+</style>
+
+ </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Make My Team - FIFA</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <!--<li><a href="#offensive">Offensive</a></li>
+            <li><a href="#defensive">Defensive</a></li> -->
+			<li>  <a href="http://127.0.0.1:8080/Project/soccertest/soccer-analysis-of.html" onclick="myClick(this,'frame1'); return false;">Offensive</a></li>
+			<li> <a href="http://127.0.0.1:8080/Project/soccertest/soccer-analysis-de.html" onclick="myClick(this,'frame2'); return false;">Defensive</a></li>
+			<li> <a href="http://127.0.0.1:8080/Project/soccertest/countrybar.html" onclick="myClick(this,'frame3'); return false;">Basic Stats</a></li>
+			
+          
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input class="form-control" placeholder="Search..." type="text">
+          </form>
+        </div>
+      </div>
+    </nav>
+  
+ <p> <h2>Soccer Statistics - For Managers</h2> </p>  
+			
+    <div class="container-fluid">
+	
+      <div class="row">
+  <!--      <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar" id="myTab">
+            <li class="active">
+				 <a> <strong><span>Offensive Stats </span></strong><span class="sr-only">(current)</span></a></li>
+            <li><a href="#bolo"><strong>Defensive Stats</strong></a></li>
+          
+			<li class="active"> <a href="#offensive"> Offensive Stats</a></li>
+          </ul>
+        
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">Soccer 2013-14 Statistics</h1>
+		-->
+	
+	    <script type="text/javascript">
+    function myClick(link, frameId) {
+	if (frameId=='frame1')
+	{
+	 var theFrame = document.getElementById("frame2");
+     theFrame.style.display = "none";
+	 var theFrame1 = document.getElementById("frame3");
+     theFrame1.style.display = "none";
+	}
+	if (frameId == "frame2")
+	{
+	var theFrame = document.getElementById("frame1");
+     theFrame.style.display = "none";
+	  var theFrame1 = document.getElementById("frame3");
+     theFrame1.style.display = "none";
+	}
+	
+		if (frameId == "frame3")
+	{
+	var theFrame = document.getElementById("frame1");
+     theFrame.style.display = "none";
+	  var theFrame2 = document.getElementById("frame3");
+     theFrame2.style.display = "none";
+	}
+	
+    var theFrame = document.getElementById(frameId);
+    theFrame.style.display = "block";
+    theFrame.src = link.href;
+    }
+    </script>
+	
+	<div>
+  
+    <iframe id="frame1" style="display: none;" src="http://about:blank" width="1024" height="3000"></iframe>
+	</div>
+	<span>
+	
+    <iframe id="frame2" style="display: none;" src="http://about:blank" width="1024" height="3000"></iframe>
+	</span>
+	
+	<span>
+	
+    <iframe id="frame3" style="display: none;" src="http://about:blank" width="1024" height="3000"></iframe>
+	</span>
+	
+	
+	
+	<!--
+	
+	<div  id="offensive">
+<script>
+$( "#defensive" ).empty();
+$( "#offensive" ).load( "/Project/soccertest/soccer-analysis-of.html" );
+</script>
+		</div>
+		
+		<div id="defensive">
+
+<script>
+$( "#offensive" ).empty();
+$( "#defensive" ).load( "/Project/soccertest/soccer-analysis-de.html" );
+</script>		</div>
+          </div>
+-->
+          <h2 class="sub-header"><ul class="list-group"> <u>Team Members </u> 
+  <li class="list-group-item">
+  Ajay Sadhu
+  </li>
+  <li class="list-group-item">
+    Alexander Hohl
+  </li>
+  <li class="list-group-item">
+   John Vue
+  </li>
+  <li class="list-group-item">
+     Kevin VanEmmerick
+  </li>
+  <li class="list-group-item">
+     Kongmeng Vang
+  </li>
+  <li class="list-group-item">
+     Taylor Tillinger
+  </li>
+</ul></h2>
+      Dashboard Template from <a href="http://getbootstrap.com/examples/dashboard">Bootstrap</a><br/>
+	  Data set from <a href="http://www.whoscored.com" >WhoScored.com</a>
+		
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="Dashboard%20Template%20for%20Bootstrap_files/jquery.js"></script>
+    <script src="Dashboard%20Template%20for%20Bootstrap_files/bootstrap.js"></script>
+    <script src="Dashboard%20Template%20for%20Bootstrap_files/docs.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="Dashboard%20Template%20for%20Bootstrap_files/ie10-viewport-bug-workaround.js"></script>
+  
+
+<div data-original-title="Copy to clipboard" title="" style="position: absolute; left: 0px; top: -9999px; width: 15px; height: 15px; z-index: 999999999;" class="global-zeroclipboard-container" id="global-zeroclipboard-html-bridge">      <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" id="global-zeroclipboard-flash-bridge" height="100%" width="100%">         <param name="movie" value="/assets/flash/ZeroClipboard.swf?noCache=1417912359226">         <param name="allowScriptAccess" value="sameDomain">         <param name="scale" value="exactfit">         <param name="loop" value="false">         <param name="menu" value="false">         <param name="quality" value="best">         <param name="bgcolor" value="#ffffff">         <param name="wmode" value="transparent">         <param name="flashvars" value="trustedOrigins=getbootstrap.com%2C%2F%2Fgetbootstrap.com%2Chttp%3A%2F%2Fgetbootstrap.com">         <embed src="Dashboard%20Template%20for%20Bootstrap_files/ZeroClipboard.swf" loop="false" menu="false" quality="best" bgcolor="#ffffff" name="global-zeroclipboard-flash-bridge" allowscriptaccess="sameDomain" allowfullscreen="false" type="application/x-shockwave-flash" wmode="transparent" pluginspage="http://www.macromedia.com/go/getflashplayer" flashvars="trustedOrigins=getbootstrap.com%2C%2F%2Fgetbootstrap.com%2Chttp%3A%2F%2Fgetbootstrap.com" scale="exactfit" height="100%" width="100%">                </object></div><svg style="visibility: hidden; position: absolute; top: -100%; left: -100%;" preserveAspectRatio="none" viewBox="0 0 200 200" height="200" width="200"><defs></defs><text style="font-weight:bold;font-size:10pt;font-family:Arial, Helvetica, Open Sans, sans-serif;dominant-baseline:middle" y="10" x="0">200x200</text></svg></body></html>

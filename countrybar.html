@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Crossfilter</title>
+<!--*************************************** Bar chart D3 Code is taken from http://bl.ocks.org/mbostock/3885304
+	Its a frequency graph******************************************************************* -->
+	
+<style>
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: relative;
+  width: 960px;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+  fill-opacity: .9;
+}
+
+.x.axis path {
+  display: none;
+}
+
+label {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+</style>
+
+<div id="body">
+
+<h1>Countries of the Premier League</h1>
+
+<h2></h2>
+
+<h2>English Premier League Player Origins</h2>
+
+
+<label><input type="checkbox"> Sort values</label>
+
+</div>
+
+<script src="d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<!--*************************************** Bar chart D3 Code is taken from http://bl.ocks.org/mbostock/3885304
+	Its a frequency graph******************************************************************* -->
+<script>
+
+
+var countrymargin = {top: 20, right: 20, bottom: 30, left: 40}, /*This is a modified line*/
+    countrywidth = 1200 - countrymargin.left - countrymargin.right, /*This is a modified line*/
+    countryheight = 500 - countrymargin.top - countrymargin.bottom; /*This is a modified line*/
+
+var countryx = d3.scale.ordinal() /*This is a modified line*/
+    .rangeRoundBands([0, countrywidth], .1, 1); /*This is a modified line*/
+
+var countryy = d3.scale.linear() /*This is a modified line*/
+    .range([countryheight, 0]); /*This is a modified line*/
+
+var countryxAxis = d3.svg.axis() /*This is a modified line*/
+    .scale(countryx) /*This is a modified line*/
+    .orient("bottom"); /*This is a modified line*/
+
+var countryyAxis = d3.svg.axis() /*This is a modified line*/
+    .scale(countryy) /*This is a modified line*/
+    .orient("left") /*This is a modified line*/
+    /*.tickFormat(formatPercent);*/ /*This is a modified line*/
+
+var countrysvg = d3.select("body").append("svg") /*This is a modified line*/
+    .attr("width", countrywidth + countrymargin.left + countrymargin.right) /*This is a modified line*/
+    .attr("height", countryheight + countrymargin.top + countrymargin.bottom) /*This is a modified line*/
+  .append("g") /*This is a modified line*/
+    .attr("transform", "translate(" + countrymargin.left + "," + countrymargin.top + ")"); /*This is a modified line*/
+
+var countrytip = d3.tip() /*This is a modified line*/
+  .attr('class', 'd3-tip') /*This is a modified line*/
+  .offset([-30, 0]) /*This is a modified line*/
+  .html(function(d) { /*This is a modified line*/
+    return "<strong>Country:</strong> <span style='color:red'>" + d.countryname + "</span>"; /*This is a modified line*/
+  }) /*This is a modified line*/
+  
+  countrysvg.call(countrytip); /*This is a modified line*/
+  
+  var line = d3.svg.line() /*This is a modified line*/
+    .x(function(d) { return x(d.goals); }) /*This is a modified line*/
+    .y(function(d) { return y(d.assistTotal); }); /*This is a modified line*/
+	
+d3.csv("country.csv", function(error, data) { /*This is a modified line*/
+
+  data.forEach(function(d) {
+    d.frequency = +d.frequency;
+  });
+
+  countryx.domain(data.map(function(d) { return d.countrycode; })); /*This is a modified line*/
+  countryy.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+  countrysvg.append("g") /*This is a modified line*/
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + countryheight + ")") /*This is a modified line*/
+      .call(countryxAxis); /*This is a modified line*/
+
+  countrysvg.append("g") /*This is a modified line*/
+      .attr("class", "y axis")
+      .call(countryyAxis) /*This is a modified line*/
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Frequency");
+
+  countrysvg.selectAll(".bar") /*This is a modified line*/
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return countryx(d.countrycode); }) /*This is a modified line*/
+      .attr("width", countryx.rangeBand()) /*This is a modified line*/
+      .attr("y", function(d) { return countryy(d.frequency); }) /*This is a modified line*/
+      .attr("height", function(d) { return countryheight - countryy(d.frequency);}) /*This is a modified line*/
+      .on('mouseover', countrytip.show) /*This is a modified line*/
+      .on('mouseout', countrytip.hide); /*This is a modified line*/
+
+  d3.select("input").on("change", change);
+
+  var sortTimeout = setTimeout(function() {
+    d3.select("input").property("checked", true).each(change);
+  }, 2000);
+
+  function change() {
+    clearTimeout(sortTimeout);
+
+    var x0 = countryx.domain(data.sort(this.checked
+        ? function(a, b) { return b.frequency - a.frequency; }
+        : function(a, b) { return d3.ascending(a.countrycode, b.countrycode); }) /*This is a modified line*/
+        .map(function(d) { return d.countrycode; })) /*This is a modified line*/
+        .copy();
+
+    var transition = countrysvg.transition().duration(750),
+        delay = function(d, i) { return i * 50; };
+
+    transition.selectAll(".bar")
+        .delay(delay)
+        .attr("x", function(d) { return x0(d.countrycode); }); /*This is a modified line*/
+
+    transition.select(".x.axis")
+        .call(countryxAxis) /*This is a modified line*/
+      .selectAll("g")
+        .delay(delay);
+  }
+});
+
+</script>
